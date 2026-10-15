@@ -1,68 +1,56 @@
 # Easy Install — Muse 오케스트레이션 원스톱 세팅
 
 이 파일 하나로 Muse 오케스트레이션의 설치·로그인·VM 유지를 모두 설정한다.
-각 섹션의 프롬프트를 그대로 복사해 Muse에게 붙여넣으면 된다.
+각 섹션의 코드 블록 우측 상단 복사 버튼 한 번으로 프롬프트 전체가 복사된다.
 
 ---
 
 # 1. 도구 설치 프롬프트
 
-새 VM에서 아래를 그대로 복사해 Muse에게 보내면 설치가 자동으로 진행된다.
+아래 코드 블록의 복사 버튼을 눌러 전체를 복사한 뒤 Muse에게 붙여넣으면 된다.
 구독하지 않는 도구가 있으면 SKIP 목록에 적어서 빼고 설치할 수 있다.
 
 ```
 Muse 오케스트레이션 도구를 설치해줘. 아래 순서대로 진행하고, 각 단계마다 결과를 보고해줘.
 
-**SKIP: []** ← 구독하지 않는 도구가 있으면 여기에 적어줘. 예: [claude, gemini]
+SKIP: []  <- 구독하지 않는 도구가 있으면 여기에 적어줘. 예: [claude, gemini]
 (SKIP에 적힌 도구는 설치하지 않고 건너뛴다. ego-light는 구독과 무관하므로 항상 설치한다.)
 
-## 1. 사전 확인
-- `node --version`으로 Node.js 18 이상인지 확인
-- `which claude codex gemini`로 이미 설치된 게 있는지 확인
+[1] 사전 확인
+- node --version으로 Node.js 18 이상인지 확인
+- which claude codex gemini로 이미 설치된 게 있는지 확인
 - 이미 설치된 건 건너뛰고, 없는 것만 설치해
 - SKIP에 있는 도구는 확인도 하지 말고 건너뛰어
 
-## 2. Claude Code 설치 (SKIP에 claude가 있으면 건너뜀)
-```bash
-npm i -g @anthropic-ai/claude-code
-```
-설치 후 `claude --version`으로 확인해줘.
+[2] Claude Code 설치 (SKIP에 claude가 있으면 건너뜀)
+- npm i -g @anthropic-ai/claude-code
+- 설치 후 claude --version으로 확인해줘.
 
-## 3. Codex CLI 설치 (SKIP에 codex가 있으면 건너뜀)
-```bash
-npm i -g @openai/codex
-```
-단, `/opt/hatch-image/bin/codex`에 이미 있으면 npm 설치를 건너뛰고 그걸 사용해.
-설치 후 `codex --version`으로 확인해줘.
+[3] Codex CLI 설치 (SKIP에 codex가 있으면 건너뜀)
+- npm i -g @openai/codex
+- 단, /opt/hatch-image/bin/codex에 이미 있으면 npm 설치를 건너뛰고 그걸 사용해.
+- 설치 후 codex --version으로 확인해줘.
 
-## 4. Gemini CLI 설치 (SKIP에 gemini가 있으면 건너뜀)
-```bash
-npm i -g @google/gemini-cli
-```
-설치 후 `gemini --version`으로 확인해줘.
+[4] Gemini CLI 설치 (SKIP에 gemini가 있으면 건너뜀)
+- npm i -g @google/gemini-cli
+- 설치 후 gemini --version으로 확인해줘.
 
-## 5. pproxy 설치 (브라우저용, 항상 설치)
-```bash
-pip install --break-system-packages pproxy
-```
-설치 후 pproxy가 127.0.0.1:3129에서 실행 중인지 확인하고, 안 떠 있으면 시작해줘:
-```bash
-nohup /usr/local/bin/pproxy -l http://127.0.0.1:3129 -r http://hatch-egress-proxy:3128 >/tmp/pproxy.log 2>&1 &
-```
+[5] pproxy 설치 (브라우저용, 항상 설치)
+- pip install --break-system-packages pproxy
+- 설치 후 127.0.0.1:3129에서 실행 중인지 확인하고, 안 떠 있으면 시작해줘:
+  nohup /usr/local/bin/pproxy -l http://127.0.0.1:3129 -r http://hatch-egress-proxy:3128 >/tmp/pproxy.log 2>&1 &
 
-## 6. ego light 설치 (브라우저용, 항상 설치)
-- `~/workspace/ego-lite-linux`에 이미 있으면 건너뛰고, 없으면 사용자에게 알려줘 (별도 설치 필요)
-- `~/.local/bin/ego-browser` 실행 파일이 있는지 확인
-- `~/.local/bin/chrome-no-sandbox` 크롬 래퍼가 있는지 확인 (없으면 사용자에게 알려줘)
-- `~/.bashrc`에 아래가 있는지 확인하고 없으면 추가해줘:
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-export EGO_HEADLESS=1
-export EGO_CHROME_PATH=$HOME/.local/bin/chrome-no-sandbox
-```
-- `ego-browser --doctor`로 데몬·크롬 상태를 확인해줘
+[6] ego light 설치 (브라우저용, 항상 설치)
+- ~/workspace/ego-lite-linux에 이미 있으면 건너뛰고, 없으면 사용자에게 알려줘 (별도 설치 필요)
+- ~/.local/bin/ego-browser 실행 파일이 있는지 확인
+- ~/.local/bin/chrome-no-sandbox 크롬 래퍼가 있는지 확인 (없으면 사용자에게 알려줘)
+- ~/.bashrc에 아래가 있는지 확인하고 없으면 추가해줘:
+  export PATH="$HOME/.local/bin:$PATH"
+  export EGO_HEADLESS=1
+  export EGO_CHROME_PATH=$HOME/.local/bin/chrome-no-sandbox
+- ego-browser --doctor로 데몬/크롬 상태를 확인해줘
 
-## 7. 최종 보고
+[7] 최종 보고
 아래 형식으로 결과만 간단히 보고해줘:
 - claude: 버전 / 설치됨 / 이미 있었음 / SKIP됨
 - codex: 버전 / 설치됨 / 이미 있었음 / SKIP됨
@@ -75,13 +63,11 @@ export EGO_CHROME_PATH=$HOME/.local/bin/chrome-no-sandbox
 
 ---
 
-# 2. 로그인 (설치 후 사용자가 직접, SKIP한 도구는 제외)
+# 2. 로그인 안내 (설치 후 사용자가 직접, SKIP한 도구는 제외)
 
 ## Claude Code
 
-```bash
-claude auth login
-```
+    claude auth login
 
 1번(Claude 구독 계정)을 선택하면 인증 URL이 표시된다. 브라우저가 있는 기기에서 URL을 열고 Authorize를 클릭한 뒤, 받은 승인 코드를 터미널에 붙여넣는다.
 
@@ -91,9 +77,7 @@ claude auth login
 
 ## Codex CLI
 
-```bash
-codex login
-```
+    codex login
 
 ChatGPT 계정으로 OAuth 로그인. device-auth 방식도 지원한다.
 
@@ -103,17 +87,16 @@ ChatGPT 계정으로 OAuth 로그인. device-auth 방식도 지원한다.
 
 ## Gemini CLI
 
-**API 키 방식 (헤드리스 환경 권장):**
+API 키 방식 (헤드리스 환경 권장):
 
 1. https://aistudio.google.com/apikey 에서 "Create API key" 클릭
 2. 발급된 키를 환경변수로 설정:
-```bash
-export GEMINI_API_KEY="발급받은키"
-```
+
+    export GEMINI_API_KEY="발급받은키"
+
 3. `~/.bashrc`에 추가해 영구 설정:
-```bash
-echo 'export GEMINI_API_KEY="발급받은키"' >> ~/.bashrc
-```
+
+    echo 'export GEMINI_API_KEY="발급받은키"' >> ~/.bashrc
 
 확인: `gemini -p "한 단어로 답해: 테스트"` → 정상 응답이면 완료.
 
@@ -126,63 +109,49 @@ echo 'export GEMINI_API_KEY="발급받은키"' >> ~/.bashrc
 
 # 3. VM 교체 후 자동 유지 프롬프트
 
-아래를 Muse에게 보내면 VM이 바뀌어도 설정이 유지되도록 세팅한다. 한 번만 실행하면 된다.
+아래 코드 블록의 복사 버튼을 눌러 전체를 복사한 뒤 Muse에게 붙여넣으면 된다. 한 번만 실행하면 된다.
 
 ```
 VM이 교체돼도 오케스트레이션 세팅이 유지되도록 설정해줘.
 
-## 1. 복원 스크립트 확인
-- `~/workspace/toolchain/restore.sh` 파일이 있는지 확인
+[1] 복원 스크립트 확인
+- ~/workspace/toolchain/restore.sh 파일이 있는지 확인
 - 없으면 아래 스크립트를 그대로 만들어줘:
-
-```bash
-#!/bin/bash
-RESTORE_LOG="/tmp/toolchain-restore.log"
-log() { echo "[$(date '+%H:%M:%S')] $1" | tee -a "$RESTORE_LOG"; }
-need_restore=false
-command -v claude >/dev/null 2>&1 || { log "claude 없음 → 설치"; need_restore=true; }
-command -v gemini >/dev/null 2>&1 || { log "gemini 없음 → 설치"; need_restore=true; }
-if [ "$need_restore" = true ]; then
-  log "npm 전역 패키지 재설치 시작"
-  npm i -g @anthropic-ai/claude-code @google/gemini-cli 2>&1 | tail -2 | tee -a "$RESTORE_LOG"
-fi
-python3 -c "import pproxy" 2>/dev/null || {
-  log "pproxy 없음 → 설치"
-  pip install --break-system-packages -q pproxy 2>&1 | tail -1 | tee -a "$RESTORE_LOG"
-}
-if ! (exec 3<>/dev/tcp/127.0.0.1/3129) 2>/dev/null; then
-  log "pproxy 실행 → 시작"
-  nohup /usr/local/bin/pproxy -l http://127.0.0.1:3129 -r http://hatch-egress-proxy:3128 >/tmp/pproxy.log 2>&1 &
-fi
-```
-
-- `chmod +x ~/workspace/toolchain/restore.sh`로 실행 권한 부여
-
-## 2. ~/.bashrc에 복원 훅 추가
-`~/.bashrc` 맨 아래에 아래 내용이 없으면 추가해줘:
-```bash
-# VM 교체 후 툴체인 자동 복원 (muse-orchestration)
-if [ -f "$HOME/workspace/toolchain/restore.sh" ]; then
-  if ! command -v claude >/dev/null 2>&1 || ! command -v gemini >/dev/null 2>&1; then
-    bash "$HOME/workspace/toolchain/restore.sh" >/tmp/toolchain-restore.log 2>&1 &
+  #!/bin/bash
+  RESTORE_LOG="/tmp/toolchain-restore.log"
+  log() { echo "[$(date '+%H:%M:%S')] $1" | tee -a "$RESTORE_LOG"; }
+  need_restore=false
+  command -v claude >/dev/null 2>&1 || { log "claude 없음 -> 설치"; need_restore=true; }
+  command -v gemini >/dev/null 2>&1 || { log "gemini 없음 -> 설치"; need_restore=true; }
+  if [ "$need_restore" = true ]; then
+    npm i -g @anthropic-ai/claude-code @google/gemini-cli 2>&1 | tail -2 | tee -a "$RESTORE_LOG"
   fi
-fi
-```
+  python3 -c "import pproxy" 2>/dev/null || pip install --break-system-packages -q pproxy
+  if ! (exec 3<>/dev/tcp/127.0.0.1/3129) 2>/dev/null; then
+    nohup /usr/local/bin/pproxy -l http://127.0.0.1:3129 -r http://hatch-egress-proxy:3128 >/tmp/pproxy.log 2>&1 &
+  fi
+- chmod +x ~/workspace/toolchain/restore.sh로 실행 권한 부여
 
-주의: 비대화형 셸에서는 `~/.bashrc`가 실행되지 않을 수 있다. 이 경우 세션 시작 시 수동으로 `bash ~/workspace/toolchain/restore.sh`를 실행한다.
+[2] ~/.bashrc에 복원 훅 추가
+~/.bashrc 맨 아래에 아래 내용이 없으면 추가해줘:
+  # VM 교체 후 툴체인 자동 복원 (muse-orchestration)
+  if [ -f "$HOME/workspace/toolchain/restore.sh" ]; then
+    if ! command -v claude >/dev/null 2>&1 || ! command -v gemini >/dev/null 2>&1; then
+      bash "$HOME/workspace/toolchain/restore.sh" >/tmp/toolchain-restore.log 2>&1 &
+    fi
+  fi
+주의: 비대화형 셸에서는 ~/.bashrc가 실행되지 않을 수 있다. 이 경우 세션 시작 시 수동으로 bash ~/workspace/toolchain/restore.sh를 실행한다.
 
-## 3. ~/.bashrc에 ego light 환경변수 확인
+[3] ~/.bashrc에 ego light 환경변수 확인
 아래가 없으면 추가해줘:
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-export EGO_HEADLESS=1
-export EGO_CHROME_PATH=$HOME/.local/bin/chrome-no-sandbox
-```
+  export PATH="$HOME/.local/bin:$PATH"
+  export EGO_HEADLESS=1
+  export EGO_CHROME_PATH=$HOME/.local/bin/chrome-no-sandbox
 
-## 4. ~/.bashrc에 GEMINI_API_KEY 확인
-`GEMINI_API_KEY`가 설정되어 있는지 확인하고, 없으면 사용자에게 알려줘 (API 키는 사용자가 직접 입력해야 함).
+[4] ~/.bashrc에 GEMINI_API_KEY 확인
+GEMINI_API_KEY가 설정되어 있는지 확인하고, 없으면 사용자에게 알려줘 (API 키는 사용자가 직접 입력해야 함).
 
-## 5. 최종 보고
+[5] 최종 보고
 - restore.sh: 있음 / 새로 만듦
 - .bashrc 복원 훅: 있음 / 추가함
 - .bashrc ego light 환경변수: 있음 / 추가함
@@ -204,16 +173,14 @@ export EGO_CHROME_PATH=$HOME/.local/bin/chrome-no-sandbox
 
 호출 방법:
 
-```bash
-# GPT에게 깊은 사고 위임
-echo "프롬프트" | codex exec --skip-git-repo-check -
+    # GPT에게 깊은 사고 위임
+    echo "프롬프트" | codex exec --skip-git-repo-check -
 
-# Claude에게 코드 작업 위임
-claude -p "프롬프트"
+    # Claude에게 코드 작업 위임
+    claude -p "프롬프트"
 
-# Gemini에게 리서치 위임
-gemini -p "프롬프트"
-```
+    # Gemini에게 리서치 위임
+    gemini -p "프롬프트"
 
 라우팅 규칙:
 - 단순 채팅·실행 → Muse가 직접 처리
@@ -228,14 +195,12 @@ gemini -p "프롬프트"
 
 # 5. 설치 후 검증
 
-```bash
-which claude codex gemini
-claude auth status --text     # Login method 확인
-codex login status            # Logged in using ChatGPT 확인
-gemini -p "한 단어로 답해: 테스트"  # 정상 응답 확인
-ego-browser --doctor          # 데몬·크롬 상태 확인
-ss -tln | grep 3129           # pproxy 실행 확인
-```
+    which claude codex gemini
+    claude auth status --text     # Login method 확인
+    codex login status            # Logged in using ChatGPT 확인
+    gemini -p "한 단어로 답해: 테스트"  # 정상 응답 확인
+    ego-browser --doctor          # 데몬·크롬 상태 확인
+    ss -tln | grep 3129           # pproxy 실행 확인
 
 ---
 
