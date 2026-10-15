@@ -90,8 +90,17 @@ ChatGPT 계정으로 OAuth 로그인. device-auth 방식도 지원한다.
 
     curl -fsSL https://antigravity.google/cli/install.sh | bash
 
-`~/.local/bin/agy`에 설치된다. 첫 실행 시 브라우저 OAuth로 Google 계정 로그인한다.
-헤드리스 환경에서는 인증 URL이 출력되므로 브라우저에서 열고 코드를 입력한다.
+`~/.local/bin/agy`에 설치된다.
+
+**로그인 (2026-10-15 검증됨):** VM 헤드리스 환경에서는 `agy`의 TUI OAuth 화면을 캡처할 수 없으므로 아래 방식을 사용한다.
+
+1. 맥 터미널에서 `agy` 실행 → 화면의 Google 로그인 URL을 브라우저에서 열고 승인
+2. `~/.gemini/antigravity-cli/antigravity-oauth-token` 파일을 VM에 전달 (Google Drive 공유 또는 파일 첨부)
+3. VM의 `~/.gemini/antigravity-cli/`에 배치, 권한 600 설정
+
+**헤드리스 호출 설정:** `~/.bashrc`에 아래 래퍼를 등록한다 (권한 프롬프트 우회).
+
+    agy() { command agy --dangerously-skip-permissions "$@"; }
 
 확인:
 

@@ -99,14 +99,33 @@ curl -fsSL https://antigravity.google/cli/install.sh | bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-로그인:
+### 로그인 (2026-10-15 검증된 방식)
+
+VM의 헤드리스 환경에서는 `agy`의 TUI OAuth 화면을 캡처할 수 없으므로, 개인 기기(맥)에서 로그인 후 인증 토큰 파일을 옮기는 방식을 사용한다.
+
+1. 맥 터미널에서 설치 후 실행:
+   ```bash
+   curl -fsSL https://antigravity.google/cli/install.sh | bash
+   agy
+   ```
+2. 화면에 나오는 Google 로그인 URL을 브라우저에서 열고 승인한다.
+3. 로그인 완료 후 `~/.gemini/antigravity-cli/antigravity-oauth-token` 파일을 VM에 전달한다 (Google Drive 공유 또는 파일 첨부).
+4. VM의 `~/.gemini/antigravity-cli/`에 배치하고 권한 600으로 설정한다:
+   ```bash
+   cp antigravity-oauth-token ~/.gemini/antigravity-cli/
+   chmod 600 ~/.gemini/antigravity-cli/antigravity-oauth-token
+   ```
+
+주의: `agy` 실행 후 토큰 파일이 변경될 수 있으므로, 원본 파일을 백업해 둔다.
+
+### 헤드리스 호출 설정
+
+헤드리스 환경에서는 도구 권한 프롬프트를 띄울 수 없으므로 `--dangerously-skip-permissions` 플래그가 필요하다. 매번 붙이지 않도록 `~/.bashrc`에 래퍼 함수를 등록한다:
 
 ```bash
-agy
+# Antigravity CLI: 항상 --dangerously-skip-permissions 적용
+agy() { command agy --dangerously-skip-permissions "$@"; }
 ```
-
-첫 실행 시 브라우저 OAuth 흐름이 시작된다. Google 계정으로 로그인하고 승인한다.
-헤드리스/SSH 환경에서는 인증 URL이 출력되므로 브라우저에서 열고 코드를 터미널에 입력한다.
 
 로그인 확인:
 

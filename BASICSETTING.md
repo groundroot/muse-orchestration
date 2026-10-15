@@ -97,7 +97,7 @@ ss -tln | grep 3129 || echo "pproxy not running"
 
 - `~/.claude/.credentials.json` — Claude 계정
 - `~/.codex/auth.json` — ChatGPT 계정
-- `~/.gemini/antigravity-cli/` — Antigravity 인증
+- `~/.gemini/antigravity-cli/antigravity-oauth-token` — Antigravity 인증 (맥에서 로그인 후 토큰 파일 이전, 2026-10-15 검증)
 
 ## 참고
 
