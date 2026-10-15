@@ -107,3 +107,59 @@ ChatGPT 계정으로 OAuth 로그인. 확인: `codex login status` → `Logged i
 - 상세 설치법: [INSTALL.md](INSTALL.md)
 - VM 교체 후 자동 복원: [BASICSETTING.md](BASICSETTING.md)
 - 문제 해결: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+
+---
+
+# VM 교체 후 자동 유지 — Muse에게 붙여넣는 세팅 프롬프트
+
+아래 프롬프트를 Muse에게 보내면 VM이 바뀌어도 설정이 유지되도록 세팅한다.
+한 번만 실행하면 된다.
+
+---
+
+```
+VM이 교체돼도 오케스트레이션 세팅이 유지되도록 설정해줘.
+
+## 1. 복원 스크립트 확인
+- `~/workspace/toolchain/restore.sh` 파일이 있는지 확인
+- 없으면 [BASICSETTING.md](BASICSETTING.md)의 스크립트를 그대로 만들어줘
+- `chmod +x ~/workspace/toolchain/restore.sh`로 실행 권한 부여
+
+## 2. basicsetting.md 확인
+- `~/workspace/basicsetting.md` 파일이 있는지 확인
+- 없으면 [BASICSETTING.md](BASICSETTING.md)의 내용을 그대로 만들어줘
+
+## 3. ~/.bashrc에 복원 훅 추가
+`~/.bashrc` 맨 아래에 아래 내용이 없으면 추가해줘:
+
+```bash
+# VM 교체 후 툴체인 자동 복원 (muse-orchestration)
+if [ -f "$HOME/workspace/toolchain/restore.sh" ]; then
+  if ! command -v claude >/dev/null 2>&1 || ! command -v gemini >/dev/null 2>&1; then
+    bash "$HOME/workspace/toolchain/restore.sh" >/tmp/toolchain-restore.log 2>&1 &
+  fi
+fi
+```
+
+주의: 비대화형 셸에서는 `~/.bashrc`가 실행되지 않을 수 있다. 이 경우 AGENTS.md의 최우선 규칙(세션 시작 시 툴체인 확인)이 안전장치가 된다.
+
+## 4. ~/.bashrc에 ego light 환경변수 확인
+아래가 없으면 추가해줘:
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+export EGO_HEADLESS=1
+export EGO_CHROME_PATH=$HOME/.local/bin/chrome-no-sandbox
+```
+
+## 5. ~/.bashrc에 GEMINI_API_KEY 확인
+`GEMINI_API_KEY`가 설정되어 있는지 확인하고, 없으면 사용자에게 알려줘 (API 키는 사용자가 직접 입력해야 함).
+
+## 6. 최종 보고
+- restore.sh: 있음 / 새로 만듦
+- basicsetting.md: 있음 / 새로 만듦
+- .bashrc 복원 훅: 있음 / 추가함
+- .bashrc ego light 환경변수: 있음 / 추가함
+- GEMINI_API_KEY: 설정됨 / 없음 (사용자 입력 필요)
+
+위 항목 중 "새로 만듦" 또는 "추가함"이 있으면 뭘 했는지 간단히 설명해줘.
+```
