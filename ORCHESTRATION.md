@@ -9,7 +9,7 @@
 | 역할 | 담당 | 정체성 |
 |------|------|--------|
 | 두뇌 (전략·판단) | GPT 6, Claude | 계획 수립, 아키텍처 설계, 깊은 분석, 코드 작성 |
-| 리서치 | Gemini | 웹 리서치, 자료 조사 |
+| 리서치 | Antigravity (`agy`) | 웹 리서치, 자료 조사 (Gemini CLI 후속) |
 | 손발 (실행) | Muse | 도구 실행, 파일 작업, 검색, 메일 확인, 스케줄 관리 |
 | 창구 (소통) | Muse | 사용자와의 대화, 결과 보고, 승인 요청 |
 
@@ -55,14 +55,14 @@ claude -p "프롬프트"
 
 또는 대화형이 필요하면 `claude` 실행 후 직접 작업한다.
 
-### 2.4 리서치 — Gemini에게 위임
+### 2.4 리서치 — Antigravity에게 위임
 
-웹 리서치·자료 조사가 필요하면 Gemini에게 위임한다.
+웹 리서치·자료 조사가 필요하면 Antigravity에게 위임한다. (Gemini CLI의 공식 후속)
 
-호출 방법 (Gemini CLI, VM에 설치됨):
+호출 방법 (Antigravity CLI `agy`, VM에 설치됨):
 
 ```bash
-gemini -p "프롬프트"
+agy -p "프롬프트"
 ```
 
 ### 2.5 브라우저 작업 — ego light (Muse가 직접 처리)
@@ -157,12 +157,12 @@ flowchart TD
     Muse -->|단순 채팅 · 실행| Direct[Muse 직접 처리<br/>질의응답 · 파일 작업 · 스케줄]
     Muse -->|깊은 사고 · 판단| GPT[GPT 6<br/>Codex CLI<br/>전략 · 계획 · 분석]
     Muse -->|코드 작업| Claude[Claude<br/>Claude Code<br/>작성 · 수정 · 리뷰]
-    Muse -->|리서치| Gemini[Gemini<br/>Gemini CLI<br/>웹 리서치 · 자료 조사]
+    Muse -->|리서치| Agy[Antigravity<br/>agy CLI<br/>웹 리서치 · 자료 조사]
     Muse -->|브라우저 작업| Ego[ego light<br/>Muse 직접<br/>수집 · 조회 · 조작]
 
     GPT --> Review{결과 검토}
     Claude --> Review
-    Gemini --> Review
+    Agy --> Review
     Direct --> Done([사용자에게 보고])
     Ego --> Done
 
@@ -179,7 +179,7 @@ sequenceDiagram
     participant M as Muse (손발·창구)
     participant G as GPT 6 (두뇌)
     participant C as Claude (두뇌)
-    participant Ge as Gemini (리서치)
+    participant Ge as Antigravity (리서치)
 
     U->>M: 업무 요청
     M->>M: 분류

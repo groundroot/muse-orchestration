@@ -13,12 +13,12 @@
 ```
 Muse 오케스트레이션 도구를 설치해줘. 아래 순서대로 진행하고, 각 단계마다 결과를 보고해줘.
 
-SKIP: []  <- 구독하지 않는 도구가 있으면 여기에 적어줘. 예: [claude, gemini]
+SKIP: []  <- 구독하지 않는 도구가 있으면 여기에 적어줘. 예: [claude, agy]
 (SKIP에 적힌 도구는 설치하지 않고 건너뛴다. ego-light는 구독과 무관하므로 항상 설치한다.)
 
 [1] 사전 확인
 - node --version으로 Node.js 18 이상인지 확인
-- which claude codex gemini로 이미 설치된 게 있는지 확인
+- which claude codex agy로 이미 설치된 게 있는지 확인
 - 이미 설치된 건 건너뛰고, 없는 것만 설치해
 - SKIP에 있는 도구는 확인도 하지 말고 건너뛰어
 
@@ -31,9 +31,10 @@ SKIP: []  <- 구독하지 않는 도구가 있으면 여기에 적어줘. 예: [
 - 단, /opt/hatch-image/bin/codex에 이미 있으면 npm 설치를 건너뛰고 그걸 사용해.
 - 설치 후 codex --version으로 확인해줘.
 
-[4] Gemini CLI 설치 (SKIP에 gemini가 있으면 건너뜀)
-- npm i -g @google/gemini-cli
-- 설치 후 gemini --version으로 확인해줘.
+[4] Antigravity CLI 설치 (SKIP에 agy가 있으면 건너뜀, Gemini CLI의 공식 후속)
+- curl -fsSL https://antigravity.google/cli/install.sh | bash
+- ~/.local/bin/agy에 설치됨. PATH에 ~/.local/bin이 없으면 ~/.bashrc에 추가해줘.
+- 설치 후 agy --version으로 확인해줘.
 
 [5] pproxy 설치 (브라우저용, 항상 설치)
 - pip install --break-system-packages pproxy
@@ -54,7 +55,7 @@ SKIP: []  <- 구독하지 않는 도구가 있으면 여기에 적어줘. 예: [
 아래 형식으로 결과만 간단히 보고해줘:
 - claude: 버전 / 설치됨 / 이미 있었음 / SKIP됨
 - codex: 버전 / 설치됨 / 이미 있었음 / SKIP됨
-- gemini: 버전 / 설치됨 / 이미 있었음 / SKIP됨
+- agy: 버전 / 설치됨 / 이미 있었음 / SKIP됨
 - pproxy: 실행 중 또는 시작함
 - ego-light: 정상 / 문제 있음 (상세)
 
@@ -85,25 +86,19 @@ ChatGPT 계정으로 OAuth 로그인. device-auth 방식도 지원한다.
 
 주의: `tgpt` CLI는 ChatGPT 계정 로그인을 지원하지 않으므로 사용하지 않는다.
 
-## Gemini CLI
+## Antigravity CLI (Gemini CLI의 공식 후속)
 
-API 키 방식 (헤드리스 환경 권장):
+    curl -fsSL https://antigravity.google/cli/install.sh | bash
 
-1. https://aistudio.google.com/apikey 에서 "Create API key" 클릭
-2. 발급된 키를 환경변수로 설정:
+`~/.local/bin/agy`에 설치된다. 첫 실행 시 브라우저 OAuth로 Google 계정 로그인한다.
+헤드리스 환경에서는 인증 URL이 출력되므로 브라우저에서 열고 코드를 입력한다.
 
-    export GEMINI_API_KEY="발급받은키"
+확인:
 
-3. `~/.bashrc`에 추가해 영구 설정:
+    agy --version
+    agy -p "한 단어로 답해: 테스트"
 
-    echo 'export GEMINI_API_KEY="발급받은키"' >> ~/.bashrc
-
-확인: `gemini -p "한 단어로 답해: 테스트"` → 정상 응답이면 완료.
-
-주의:
-- 2026년부터 AI Studio는 `AQ.`로 시작하는 새 형식 키만 발급한다. `AQ.` 키는 `x-goog-api-key` 헤더로 전달해야 하며 `?key=` 쿼리 파라미터로는 401 오류가 난다.
-- 키 발급은 무료, 카드 등록 불필요. 무료 티어 제한 내에서 과금되지 않는다.
-- Google 계정 OAuth 방식은 헤드리스 VM에서 토큰 갱신에 실패할 수 있다 (`client_secret is missing`).
+정상 응답이 오면 완료. 호출은 `agy -p "프롬프트"` 형식으로 한다.
 
 ---
 
@@ -120,12 +115,8 @@ VM이 교체돼도 오케스트레이션 세팅이 유지되도록 설정해줘.
   #!/bin/bash
   RESTORE_LOG="/tmp/toolchain-restore.log"
   log() { echo "[$(date '+%H:%M:%S')] $1" | tee -a "$RESTORE_LOG"; }
-  need_restore=false
-  command -v claude >/dev/null 2>&1 || { log "claude 없음 -> 설치"; need_restore=true; }
-  command -v gemini >/dev/null 2>&1 || { log "gemini 없음 -> 설치"; need_restore=true; }
-  if [ "$need_restore" = true ]; then
-    npm i -g @anthropic-ai/claude-code @google/gemini-cli 2>&1 | tail -2 | tee -a "$RESTORE_LOG"
-  fi
+  command -v claude >/dev/null 2>&1 || { log "claude 없음 -> 설치"; npm i -g @anthropic-ai/claude-code 2>&1 | tail -2 | tee -a "$RESTORE_LOG"; }
+  command -v agy >/dev/null 2>&1 || { log "agy 없음 -> 설치"; curl -fsSL https://antigravity.google/cli/install.sh | bash 2>&1 | tail -3 | tee -a "$RESTORE_LOG"; }
   python3 -c "import pproxy" 2>/dev/null || pip install --break-system-packages -q pproxy
   if ! (exec 3<>/dev/tcp/127.0.0.1/3129) 2>/dev/null; then
     nohup /usr/local/bin/pproxy -l http://127.0.0.1:3129 -r http://hatch-egress-proxy:3128 >/tmp/pproxy.log 2>&1 &
@@ -136,7 +127,7 @@ VM이 교체돼도 오케스트레이션 세팅이 유지되도록 설정해줘.
 ~/.bashrc 맨 아래에 아래 내용이 없으면 추가해줘:
   # VM 교체 후 툴체인 자동 복원 (muse-orchestration)
   if [ -f "$HOME/workspace/toolchain/restore.sh" ]; then
-    if ! command -v claude >/dev/null 2>&1 || ! command -v gemini >/dev/null 2>&1; then
+    if ! command -v claude >/dev/null 2>&1 || ! command -v agy >/dev/null 2>&1; then
       bash "$HOME/workspace/toolchain/restore.sh" >/tmp/toolchain-restore.log 2>&1 &
     fi
   fi
@@ -148,14 +139,10 @@ VM이 교체돼도 오케스트레이션 세팅이 유지되도록 설정해줘.
   export EGO_HEADLESS=1
   export EGO_CHROME_PATH=$HOME/.local/bin/chrome-no-sandbox
 
-[4] ~/.bashrc에 GEMINI_API_KEY 확인
-GEMINI_API_KEY가 설정되어 있는지 확인하고, 없으면 사용자에게 알려줘 (API 키는 사용자가 직접 입력해야 함).
-
-[5] 최종 보고
+[4] 최종 보고
 - restore.sh: 있음 / 새로 만듦
 - .bashrc 복원 훅: 있음 / 추가함
 - .bashrc ego light 환경변수: 있음 / 추가함
-- GEMINI_API_KEY: 설정됨 / 없음 (사용자 입력 필요)
 ```
 
 ---
@@ -168,7 +155,7 @@ GEMINI_API_KEY가 설정되어 있는지 확인하고, 없으면 사용자에게
 |------|------|---------|
 | 두뇌 (전략·판단) | GPT (Codex CLI) | 계획 수립, 깊은 분석, 아키텍처 결정 |
 | 두뇌 (코드) | Claude (Claude Code) | 코드 작성·수정·리뷰 |
-| 리서치 | Gemini (Gemini CLI) | 웹 리서치, 자료 조사 |
+| 리서치 | Antigravity (agy CLI) | 웹 리서치, 자료 조사 |
 | 손발·창구 | Muse | 도구 실행, 파일 작업, 사용자와 소통 |
 
 호출 방법:
@@ -179,14 +166,14 @@ GEMINI_API_KEY가 설정되어 있는지 확인하고, 없으면 사용자에게
     # Claude에게 코드 작업 위임
     claude -p "프롬프트"
 
-    # Gemini에게 리서치 위임
-    gemini -p "프롬프트"
+    # Antigravity에게 리서치 위임
+    agy -p "프롬프트"
 
 라우팅 규칙:
 - 단순 채팅·실행 → Muse가 직접 처리
 - 깊은 사고·판단 → GPT에게 위임
 - 코드 작업 → Claude에게 위임
-- 리서치 → Gemini에게 위임
+- 리서치 → Antigravity에게 위임
 - 브라우저 작업 → ego light로 Muse가 직접 처리 (API/CLI로 안 될 때만)
 
 브라우저 사용 원칙: **API/CLI로 되면 그걸 먼저 쓴다.** ego light는 로그인 필요 사이트, JS 렌더링 페이지, 스크린샷이 필요할 때만 사용한다.
@@ -195,10 +182,10 @@ GEMINI_API_KEY가 설정되어 있는지 확인하고, 없으면 사용자에게
 
 # 5. 설치 후 검증
 
-    which claude codex gemini
+    which claude codex agy
     claude auth status --text     # Login method 확인
     codex login status            # Logged in using ChatGPT 확인
-    gemini -p "한 단어로 답해: 테스트"  # 정상 응답 확인
+    agy -p "한 단어로 답해: 테스트"  # 정상 응답 확인
     ego-browser --doctor          # 데몬·크롬 상태 확인
     ss -tln | grep 3129           # pproxy 실행 확인
 

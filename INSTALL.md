@@ -9,7 +9,7 @@ Muse 오케스트레이션에 필요한 도구들의 설치 방법과 주의사�
 | Muse | 손발·창구 | Muse 앱 설치 |
 | Codex CLI | GPT 두뇌 (깊은 사고) | `npm i -g @openai/codex` |
 | Claude Code | Claude 두뇌 (코드 작업) | `npm i -g @anthropic-ai/claude-code` |
-| Gemini CLI | Gemini 리서치 (자료 조사) | `npm i -g @google/gemini-cli` |
+| Antigravity CLI | 리서치 (자료 조사, Gemini CLI 후속) | `curl -fsSL https://antigravity.google/cli/install.sh \| bash` |
 
 ### 공통 전제
 
@@ -87,43 +87,32 @@ claude -p "프롬프트"
 - 인증 파일 `~/.claude/.credentials.json`은 권한 600으로 유지한다 (`chmod 600`).
 - 인증 파일은 파일 형태로만 전달한다. 채팅·메신저에 직접 붙여넣지 않는다.
 
-## Gemini CLI 설치
+## Antigravity CLI 설치 (Gemini CLI의 공식 후속)
 
 ```bash
-npm i -g @google/gemini-cli
+curl -fsSL https://antigravity.google/cli/install.sh | bash
 ```
 
-로그인은 아래 두 방식 중 하나를 선택한다.
-
-### 방식 A: Google 계정 OAuth
+`~/.local/bin/agy`에 설치된다. PATH에 `~/.local/bin`이 없으면 추가한다:
 
 ```bash
-gemini
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
-대화형 터미널에서 실행하면 인증 URL이 표시된다. 브라우저에서 승인 후 코드를 입력한다.
-
-**주의:** 헤드리스 VM 환경에서는 OAuth 토큰 갱신에 실패할 수 있다 (`client_secret is missing` 오류). 비대화형 호출(`gemini -p`)이 "Manual authorization is required" 오류를 내면 방식 B를 사용한다.
-
-### 방식 B: API 키 (헤드리스 환경 권장)
-
-1. https://aistudio.google.com/apikey 에서 "Create API key"로 키 발급
-2. 환경변수로 설정:
+로그인:
 
 ```bash
-export GEMINI_API_KEY="발급받은키"
+agy
 ```
 
-3. `~/.bashrc`에 추가해 영구 설정:
-
-```bash
-echo 'export GEMINI_API_KEY="발급받은키"' >> ~/.bashrc
-```
+첫 실행 시 브라우저 OAuth 흐름이 시작된다. Google 계정으로 로그인하고 승인한다.
+헤드리스/SSH 환경에서는 인증 URL이 출력되므로 브라우저에서 열고 코드를 터미널에 입력한다.
 
 로그인 확인:
 
 ```bash
-gemini -p "한 단어로 답해: 테스트"
+agy --version
+agy -p "한 단어로 답해: 테스트"
 ```
 
 정상 응답이 오면 설치 완료다.
@@ -131,32 +120,40 @@ gemini -p "한 단어로 답해: 테스트"
 비대화형 호출:
 
 ```bash
-gemini -p "프롬프트"
+agy -p "프롬프트"
 ```
+
+모델 지정:
+
+```bash
+agy -p "프롬프트" --model "Gemini 3.5 Flash"
+```
+
+사용 가능한 모델: Gemini 3.5 Flash, Gemini 3.1 Pro, Claude Sonnet/Opus 4.6, GPT-OSS 120B 등.
 
 ### 주의사항
 
-- 2026년 중반부터 AI Studio는 `AQ.`로 시작하는 새 형식 키만 발급한다 (`AIza` 형식은 구형). `AQ.` 키는 `x-goog-api-key` 헤더로 전달해야 하며 `?key=` 쿼리 파라미터로는 401 오류가 난다.
-- API 키 발급 자체는 무료이며 카드 등록이 필요 없다. 무료 티어의 사용량 제한(RPM·일일 요청 수) 내에서 과금되지 않는다. 결제 계정을 직접 연결하지 않는 한 절대 청구되지 않는다.
-- 무료 티어로 처리된 데이터는 Google이 제품 개선에 활용할 수 있다. 민감한 내용은 다루지 않는 것이 좋다.
-- API 키는 절대 채팅에 붙여넣지 않고 파일이나 보안 입력 폼으로만 전달한다.
+- Gemini CLI는 2026-06-18부로 구 Google AI 사용자 대상 서비스가 종료되어 Antigravity CLI로 전환됐다. 신규 설치는 Antigravity를 사용한다.
+- 설정 파일은 `~/.gemini/antigravity-cli/` 아래에 저장된다.
+- 승인 코드·토큰은 절대 채팅에 붙여넣지 않고 파일로만 전달한다.
 
 ## 설치 후 검증
 
 세 도구가 모두 준비됐는지 아래로 확인한다:
 
 ```bash
-which claude codex gemini
+which claude codex agy
 claude auth status --text
 codex login status
-gemini -p "한 단어로 답해: 테스트"
+agy -p "한 단어로 답해: 테스트"
 ```
 
 ## VM 환경 주의사항
 
 Muse의 VM(리눅스)은 교체될 수 있다. 교체되면 아래가 초기화된다.
 
-- npm 전역 설치 (`codex`, `claude`, `gemini` 바이너리)
+- npm 전역 설치 (`codex`, `claude` 바이너리)
+- `~/.local/bin` 설치 (`agy` 바이너리)
 - 실행 중인 프로세스 (pproxy, ego-browser 데몬 등)
 
 유지되는 것:
@@ -164,15 +161,16 @@ Muse의 VM(리눅스)은 교체될 수 있다. 교체되면 아래가 초기화�
 - `~/workspace` 전체
 - `~/.claude/.credentials.json` (Claude 인증 유지됨)
 - `~/.codex/auth.json` (Codex 인증 유지됨)
-- `~/.bashrc`의 `GEMINI_API_KEY` (Gemini 인증 유지됨)
+- `~/.gemini/antigravity-cli/` (Antigravity 인증 유지됨)
 
 VM 교체 후 복원 순서:
 
-1. `npm i -g @anthropic-ai/claude-code @openai/codex @google/gemini-cli` 재설치
-2. `claude auth status --text`로 로그인 유지 확인 (재인증 불필요)
-3. `codex login status`로 로그인 유지 확인
-4. `gemini -p`로 동작 확인 (API 키 방식이면 재인증 불필요)
-5. 브라우저 작업이 필요하면 pproxy 시작:
+1. `npm i -g @anthropic-ai/claude-code @openai/codex` 재설치
+2. `curl -fsSL https://antigravity.google/cli/install.sh | bash`로 agy 재설치
+3. `claude auth status --text`로 로그인 유지 확인 (재인증 불필요)
+4. `codex login status`로 로그인 유지 확인
+5. `agy -p`로 동작 확인 (재인증 불필요)
+6. 브라우저 작업이 필요하면 pproxy 시작:
    ```bash
    nohup /usr/local/bin/pproxy -l http://127.0.0.1:3129 -r http://hatch-egress-proxy:3128 >/tmp/pproxy.log 2>&1 &
    ```
