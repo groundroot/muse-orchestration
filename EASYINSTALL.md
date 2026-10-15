@@ -1,10 +1,14 @@
-# Easy Install — Muse에게 붙여넣는 설치 프롬프트
+# Easy Install — Muse 오케스트레이션 원스톱 세팅
 
-새 VM에서 아래 프롬프트를 그대로 복사해 Muse에게 보내면 도구 설치가 자동으로 진행된다.
-구독하지 않는 도구가 있으면 프롬프트 맨 위의 SKIP 목록에 적어서 빼고 설치할 수 있다.
-로그인은 사용자가 직접 하는 단계로 분리되어 있다.
+이 파일 하나로 Muse 오케스트레이션의 설치·로그인·VM 유지를 모두 설정한다.
+각 섹션의 프롬프트를 그대로 복사해 Muse에게 붙여넣으면 된다.
 
 ---
+
+# 1. 도구 설치 프롬프트
+
+새 VM에서 아래를 그대로 복사해 Muse에게 보내면 설치가 자동으로 진행된다.
+구독하지 않는 도구가 있으면 SKIP 목록에 적어서 빼고 설치할 수 있다.
 
 ```
 Muse 오케스트레이션 도구를 설치해줘. 아래 순서대로 진행하고, 각 단계마다 결과를 보고해줘.
@@ -71,9 +75,9 @@ export EGO_CHROME_PATH=$HOME/.local/bin/chrome-no-sandbox
 
 ---
 
-## 로그인 (설치 후 사용자가 직접, SKIP한 도구는 제외)
+# 2. 로그인 (설치 후 사용자가 직접, SKIP한 도구는 제외)
 
-### Claude Code
+## Claude Code
 
 ```bash
 claude auth login
@@ -83,55 +87,79 @@ claude auth login
 
 확인: `claude auth status --text` → `Login method`가 표시되면 정상.
 
-주의: VM 공유 IP에서 HTTP 429가 나면 개인 네트워크 기기에서 로그인 후 `~/.claude/.credentials.json`을 파일로 옮긴다.
+주의: VM 공유 IP에서 HTTP 429가 나면 개인 네트워크 기기에서 로그인 후 `~/.claude/.credentials.json`을 파일로 옮긴다. 승인 코드는 1회용이다.
 
-### Codex CLI
+## Codex CLI
 
 ```bash
 codex login
 ```
 
-ChatGPT 계정으로 OAuth 로그인. 확인: `codex login status` → `Logged in using ChatGPT`.
+ChatGPT 계정으로 OAuth 로그인. device-auth 방식도 지원한다.
 
-### Gemini CLI
+확인: `codex login status` → `Logged in using ChatGPT`라고 표시되면 정상.
 
-**API 키 방식 (헤드리스 권장):**
+주의: `tgpt` CLI는 ChatGPT 계정 로그인을 지원하지 않으므로 사용하지 않는다.
 
-1. https://aistudio.google.com/apikey 에서 "Create API key"
-2. `export GEMINI_API_KEY="키"` 후 `~/.bashrc`에 영구 추가
+## Gemini CLI
+
+**API 키 방식 (헤드리스 환경 권장):**
+
+1. https://aistudio.google.com/apikey 에서 "Create API key" 클릭
+2. 발급된 키를 환경변수로 설정:
+```bash
+export GEMINI_API_KEY="발급받은키"
+```
+3. `~/.bashrc`에 추가해 영구 설정:
+```bash
+echo 'export GEMINI_API_KEY="발급받은키"' >> ~/.bashrc
+```
 
 확인: `gemini -p "한 단어로 답해: 테스트"` → 정상 응답이면 완료.
 
-## 참고
-
-- 상세 설치법: [INSTALL.md](INSTALL.md)
-- VM 교체 후 자동 복원: [BASICSETTING.md](BASICSETTING.md)
-- 문제 해결: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-
----
-
-# VM 교체 후 자동 유지 — Muse에게 붙여넣는 세팅 프롬프트
-
-아래 프롬프트를 Muse에게 보내면 VM이 바뀌어도 설정이 유지되도록 세팅한다.
-한 번만 실행하면 된다.
+주의:
+- 2026년부터 AI Studio는 `AQ.`로 시작하는 새 형식 키만 발급한다. `AQ.` 키는 `x-goog-api-key` 헤더로 전달해야 하며 `?key=` 쿼리 파라미터로는 401 오류가 난다.
+- 키 발급은 무료, 카드 등록 불필요. 무료 티어 제한 내에서 과금되지 않는다.
+- Google 계정 OAuth 방식은 헤드리스 VM에서 토큰 갱신에 실패할 수 있다 (`client_secret is missing`).
 
 ---
+
+# 3. VM 교체 후 자동 유지 프롬프트
+
+아래를 Muse에게 보내면 VM이 바뀌어도 설정이 유지되도록 세팅한다. 한 번만 실행하면 된다.
 
 ```
 VM이 교체돼도 오케스트레이션 세팅이 유지되도록 설정해줘.
 
 ## 1. 복원 스크립트 확인
 - `~/workspace/toolchain/restore.sh` 파일이 있는지 확인
-- 없으면 [BASICSETTING.md](BASICSETTING.md)의 스크립트를 그대로 만들어줘
+- 없으면 아래 스크립트를 그대로 만들어줘:
+
+```bash
+#!/bin/bash
+RESTORE_LOG="/tmp/toolchain-restore.log"
+log() { echo "[$(date '+%H:%M:%S')] $1" | tee -a "$RESTORE_LOG"; }
+need_restore=false
+command -v claude >/dev/null 2>&1 || { log "claude 없음 → 설치"; need_restore=true; }
+command -v gemini >/dev/null 2>&1 || { log "gemini 없음 → 설치"; need_restore=true; }
+if [ "$need_restore" = true ]; then
+  log "npm 전역 패키지 재설치 시작"
+  npm i -g @anthropic-ai/claude-code @google/gemini-cli 2>&1 | tail -2 | tee -a "$RESTORE_LOG"
+fi
+python3 -c "import pproxy" 2>/dev/null || {
+  log "pproxy 없음 → 설치"
+  pip install --break-system-packages -q pproxy 2>&1 | tail -1 | tee -a "$RESTORE_LOG"
+}
+if ! (exec 3<>/dev/tcp/127.0.0.1/3129) 2>/dev/null; then
+  log "pproxy 실행 → 시작"
+  nohup /usr/local/bin/pproxy -l http://127.0.0.1:3129 -r http://hatch-egress-proxy:3128 >/tmp/pproxy.log 2>&1 &
+fi
+```
+
 - `chmod +x ~/workspace/toolchain/restore.sh`로 실행 권한 부여
 
-## 2. basicsetting.md 확인
-- `~/workspace/basicsetting.md` 파일이 있는지 확인
-- 없으면 [BASICSETTING.md](BASICSETTING.md)의 내용을 그대로 만들어줘
-
-## 3. ~/.bashrc에 복원 훅 추가
+## 2. ~/.bashrc에 복원 훅 추가
 `~/.bashrc` 맨 아래에 아래 내용이 없으면 추가해줘:
-
 ```bash
 # VM 교체 후 툴체인 자동 복원 (muse-orchestration)
 if [ -f "$HOME/workspace/toolchain/restore.sh" ]; then
@@ -141,9 +169,9 @@ if [ -f "$HOME/workspace/toolchain/restore.sh" ]; then
 fi
 ```
 
-주의: 비대화형 셸에서는 `~/.bashrc`가 실행되지 않을 수 있다. 이 경우 AGENTS.md의 최우선 규칙(세션 시작 시 툴체인 확인)이 안전장치가 된다.
+주의: 비대화형 셸에서는 `~/.bashrc`가 실행되지 않을 수 있다. 이 경우 세션 시작 시 수동으로 `bash ~/workspace/toolchain/restore.sh`를 실행한다.
 
-## 4. ~/.bashrc에 ego light 환경변수 확인
+## 3. ~/.bashrc에 ego light 환경변수 확인
 아래가 없으면 추가해줘:
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
@@ -151,15 +179,70 @@ export EGO_HEADLESS=1
 export EGO_CHROME_PATH=$HOME/.local/bin/chrome-no-sandbox
 ```
 
-## 5. ~/.bashrc에 GEMINI_API_KEY 확인
+## 4. ~/.bashrc에 GEMINI_API_KEY 확인
 `GEMINI_API_KEY`가 설정되어 있는지 확인하고, 없으면 사용자에게 알려줘 (API 키는 사용자가 직접 입력해야 함).
 
-## 6. 최종 보고
+## 5. 최종 보고
 - restore.sh: 있음 / 새로 만듦
-- basicsetting.md: 있음 / 새로 만듦
 - .bashrc 복원 훅: 있음 / 추가함
 - .bashrc ego light 환경변수: 있음 / 추가함
 - GEMINI_API_KEY: 설정됨 / 없음 (사용자 입력 필요)
-
-위 항목 중 "새로 만듦" 또는 "추가함"이 있으면 뭘 했는지 간단히 설명해줘.
 ```
+
+---
+
+# 4. 역할 분담 (오케스트레이션 기본값)
+
+설치가 끝나면 아래 역할 분담이 모든 업무의 기본값이다.
+
+| 역할 | 담당 | 하는 일 |
+|------|------|---------|
+| 두뇌 (전략·판단) | GPT (Codex CLI) | 계획 수립, 깊은 분석, 아키텍처 결정 |
+| 두뇌 (코드) | Claude (Claude Code) | 코드 작성·수정·리뷰 |
+| 리서치 | Gemini (Gemini CLI) | 웹 리서치, 자료 조사 |
+| 손발·창구 | Muse | 도구 실행, 파일 작업, 사용자와 소통 |
+
+호출 방법:
+
+```bash
+# GPT에게 깊은 사고 위임
+echo "프롬프트" | codex exec --skip-git-repo-check -
+
+# Claude에게 코드 작업 위임
+claude -p "프롬프트"
+
+# Gemini에게 리서치 위임
+gemini -p "프롬프트"
+```
+
+라우팅 규칙:
+- 단순 채팅·실행 → Muse가 직접 처리
+- 깊은 사고·판단 → GPT에게 위임
+- 코드 작업 → Claude에게 위임
+- 리서치 → Gemini에게 위임
+- 브라우저 작업 → ego light로 Muse가 직접 처리 (API/CLI로 안 될 때만)
+
+브라우저 사용 원칙: **API/CLI로 되면 그걸 먼저 쓴다.** ego light는 로그인 필요 사이트, JS 렌더링 페이지, 스크린샷이 필요할 때만 사용한다.
+
+---
+
+# 5. 설치 후 검증
+
+```bash
+which claude codex gemini
+claude auth status --text     # Login method 확인
+codex login status            # Logged in using ChatGPT 확인
+gemini -p "한 단어로 답해: 테스트"  # 정상 응답 확인
+ego-browser --doctor          # 데몬·크롬 상태 확인
+ss -tln | grep 3129           # pproxy 실행 확인
+```
+
+---
+
+## 참고 문서
+
+- [README.md](README.md) — 프로젝트 소개
+- [ORCHESTRATION.md](ORCHESTRATION.md) — 역할 분담 상세, 라우팅 규칙, 워크플로우
+- [INSTALL.md](INSTALL.md) — 상세 설치 가이드
+- [BASICSETTING.md](BASICSETTING.md) — VM 전역 소프트웨어 명세
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — 문제 해결
