@@ -9,6 +9,14 @@ Muse 오케스트레이션에 필요한 도구들의 설치 방법과 주의사�
 | Muse | 손발·창구 | Muse 앱 설치 |
 | Codex CLI | GPT 두뇌 (깊은 사고) | `npm i -g @openai/codex` |
 | Claude Code | Claude 두뇌 (코드 작업) | `npm i -g @anthropic-ai/claude-code` |
+| Gemini CLI | Gemini 리서치 (자료 조사) | `npm i -g @google/gemini-cli` |
+
+### 공통 전제
+
+- Node.js 18 이상이 설치되어 있어야 한다 (`node --version`으로 확인)
+- npm 전역 설치는 `npm i -g`로 한다
+- 모든 인증 파일은 권한 600으로 유지한다
+- 승인 코드·API 키·토큰은 절대 채팅에 붙여넣지 않고 파일로만 전달한다
 
 ## Codex CLI 설치
 
@@ -66,6 +74,12 @@ claude auth status --text
 
 `Login method: Claude Team account` (또는 Pro/Max 계정)로 표시되면 정상이다.
 
+비대화형 호출:
+
+```bash
+claude -p "프롬프트"
+```
+
 ### 주의사항
 
 - **VM·클라우드 공유 IP 환경에서는 OAuth 토큰 교환 단계에서 HTTP 429가 발생할 수 있다.** 이 경우 로그인이 완료되지 않는다. 해결법은 [TROUBLESHOOTING.md](TROUBLESHOOTING.md#1-claude-code-oauth-로그인-시-http-429)를 참조.
@@ -73,11 +87,76 @@ claude auth status --text
 - 인증 파일 `~/.claude/.credentials.json`은 권한 600으로 유지한다 (`chmod 600`).
 - 인증 파일은 파일 형태로만 전달한다. 채팅·메신저에 직접 붙여넣지 않는다.
 
+## Gemini CLI 설치
+
+```bash
+npm i -g @google/gemini-cli
+```
+
+로그인은 아래 두 방식 중 하나를 선택한다.
+
+### 방식 A: Google 계정 OAuth
+
+```bash
+gemini
+```
+
+대화형 터미널에서 실행하면 인증 URL이 표시된다. 브라우저에서 승인 후 코드를 입력한다.
+
+**주의:** 헤드리스 VM 환경에서는 OAuth 토큰 갱신에 실패할 수 있다 (`client_secret is missing` 오류). 비대화형 호출(`gemini -p`)이 "Manual authorization is required" 오류를 내면 방식 B를 사용한다.
+
+### 방식 B: API 키 (헤드리스 환경 권장)
+
+1. https://aistudio.google.com/apikey 에서 "Create API key"로 키 발급
+2. 환경변수로 설정:
+
+```bash
+export GEMINI_API_KEY="발급받은키"
+```
+
+3. `~/.bashrc`에 추가해 영구 설정:
+
+```bash
+echo 'export GEMINI_API_KEY="발급받은키"' >> ~/.bashrc
+```
+
+로그인 확인:
+
+```bash
+gemini -p "한 단어로 답해: 테스트"
+```
+
+정상 응답이 오면 설치 완료다.
+
+비대화형 호출:
+
+```bash
+gemini -p "프롬프트"
+```
+
+### 주의사항
+
+- 2026년 중반부터 AI Studio는 `AQ.`로 시작하는 새 형식 키만 발급한다 (`AIza` 형식은 구형). `AQ.` 키는 `x-goog-api-key` 헤더로 전달해야 하며 `?key=` 쿼리 파라미터로는 401 오류가 난다.
+- API 키 발급 자체는 무료이며 카드 등록이 필요 없다. 무료 티어의 사용량 제한(RPM·일일 요청 수) 내에서 과금되지 않는다. 결제 계정을 직접 연결하지 않는 한 절대 청구되지 않는다.
+- 무료 티어로 처리된 데이터는 Google이 제품 개선에 활용할 수 있다. 민감한 내용은 다루지 않는 것이 좋다.
+- API 키는 절대 채팅에 붙여넣지 않고 파일이나 보안 입력 폼으로만 전달한다.
+
+## 설치 후 검증
+
+세 도구가 모두 준비됐는지 아래로 확인한다:
+
+```bash
+which claude codex gemini
+claude auth status --text
+codex login status
+gemini -p "한 단어로 답해: 테스트"
+```
+
 ## VM 환경 주의사항
 
 Muse의 VM(리눅스)은 교체될 수 있다. 교체되면 아래가 초기화된다.
 
-- npm 전역 설치 (`codex`, `claude` 바이너리)
+- npm 전역 설치 (`codex`, `claude`, `gemini` 바이너리)
 - 실행 중인 프로세스 (pproxy, ego-browser 데몬 등)
 
 유지되는 것:
@@ -85,13 +164,15 @@ Muse의 VM(리눅스)은 교체될 수 있다. 교체되면 아래가 초기화�
 - `~/workspace` 전체
 - `~/.claude/.credentials.json` (Claude 인증 유지됨)
 - `~/.codex/auth.json` (Codex 인증 유지됨)
+- `~/.bashrc`의 `GEMINI_API_KEY` (Gemini 인증 유지됨)
 
 VM 교체 후 복원 순서:
 
-1. `npm i -g @anthropic-ai/claude-code @openai/codex` 재설치
+1. `npm i -g @anthropic-ai/claude-code @openai/codex @google/gemini-cli` 재설치
 2. `claude auth status --text`로 로그인 유지 확인 (재인증 불필요)
 3. `codex login status`로 로그인 유지 확인
-4. 브라우저 작업이 필요하면 pproxy 시작:
+4. `gemini -p`로 동작 확인 (API 키 방식이면 재인증 불필요)
+5. 브라우저 작업이 필요하면 pproxy 시작:
    ```bash
    nohup /usr/local/bin/pproxy -l http://127.0.0.1:3129 -r http://hatch-egress-proxy:3128 >/tmp/pproxy.log 2>&1 &
    ```
