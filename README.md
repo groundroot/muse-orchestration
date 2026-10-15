@@ -11,6 +11,7 @@ Claude와 GPT를 두뇌로, Muse를 손발로 쓰는 AI 협업 셋업이다.
 | 손발 (실행) | Muse |
 | 창구 (대화) | Muse |
 | 브라우저 작업 | Muse (ego light) — API/CLI로 안 될 때만 |
+| 리서치 | Gemini |
 
 - 단순 채팅·실행은 Muse가 직접 처리한다.
 - 깊이 있는 사고·판단이 필요하면 GPT 6에게 위임한다.
