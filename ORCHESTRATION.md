@@ -139,4 +139,54 @@ EOF
 
 ---
 
+## 7. 전체 구조도
+
+```mermaid
+flowchart TD
+    User([사용자 요청]) --> Muse{Muse<br/>알프레드<br/>접수 · 분류}
+
+    Muse -->|단순 채팅 · 실행| Direct[Muse 직접 처리<br/>질의응답 · 파일 작업 · 스케줄]
+    Muse -->|깊은 사고 · 판단| GPT[GPT 6<br/>Codex CLI<br/>전략 · 계획 · 분석]
+    Muse -->|코드 작업| Claude[Claude<br/>Claude Code<br/>작성 · 수정 · 리뷰]
+    Muse -->|브라우저 작업| Ego[ego light<br/>Muse 직접<br/>수집 · 조회 · 조작]
+
+    GPT --> Review{결과 검토}
+    Claude --> Review
+    Direct --> Done([사용자에게 보고])
+    Ego --> Done
+
+    Review -->|되돌리기 어려움| Approve([사용자 승인])
+    Review -->|바로 실행 가능| Done
+    Approve --> Done
+```
+
+### 표준 협업 흐름 (계획 → 실행)
+
+```mermaid
+sequenceDiagram
+    participant U as 사용자
+    participant M as Muse (손발·창구)
+    participant G as GPT 6 (두뇌)
+    participant C as Claude (두뇌)
+
+    U->>M: 업무 요청
+    M->>M: 분류
+    alt 계획 필요
+        M->>G: 계획 수립 위임
+        G-->>M: 계획안
+        M->>U: 승인 요청 (되돌리기 어려운 경우)
+        U-->>M: 승인
+    end
+    alt 코드 작업 포함
+        M->>C: 코드 작업 위임
+        C-->>M: 결과물
+    end
+    alt 브라우저 작업 포함
+        M->>M: ego light로 직접 처리
+    end
+    M-->>U: 결과 보고
+```
+
+---
+
 *이 문서는 사용자의 직접 지시로 작성됐으며, 변경 시 사용자의 명시적 승인이 필요하다.*
