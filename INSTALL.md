@@ -6,7 +6,7 @@ Muse 오케스트레이션에 필요한 도구들의 설치 방법과 주의사�
 
 | 도구 | 용도 | 설치 |
 |------|------|------|
-| Muse (알프레드) | 손발·창구 | Muse 앱 설치 |
+| Muse | 손발·창구 | Muse 앱 설치 |
 | Codex CLI | GPT 두뇌 (깊은 사고) | `npm i -g @openai/codex` |
 | Claude Code | Claude 두뇌 (코드 작업) | `npm i -g @anthropic-ai/claude-code` |
 
