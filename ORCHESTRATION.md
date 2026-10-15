@@ -1,6 +1,6 @@
 # 오케스트레이션 세팅 — 역할 분담 프롬프트
 
-> 최종 수정: 2026-10-14 / 지시자: 사용자 / 적용 범위: 모든 업무
+> 최종 수정: 2026-10-15 / 지시자: 사용자 / 적용 범위: 모든 업무
 
 ---
 
@@ -53,6 +53,34 @@ claude -p "프롬프트"
 ```
 
 또는 대화형이 필요하면 `claude` 실행 후 직접 작업한다.
+
+### 2.4 브라우저 작업 — ego light (Muse가 직접 처리)
+
+웹사이트 방문·조작·수집이 필요하면 Muse가 ego light로 직접 처리한다. 두뇌에게 위임하지 않는다.
+
+- 사이트 상태 확인, 가격·재고·예약 조회
+- 로그인 후 정보 수집 (인증 단계는 사용자가 직접)
+- 폼 작성·신청 대행 (결제·외부 전송은 승인 후)
+- 페이지 스크린샷·DOM 추출
+
+호출 방법 (VM에 설치됨, `~/.local/bin/ego-browser`):
+
+```bash
+export EGO_CHROME_PATH=$HOME/.local/bin/chrome-no-sandbox EGO_HEADLESS=1
+ego-browser nodejs <<'EOF'
+await taskSpaces.useOrCreate('작업명');
+const tab = await browser.openOrReuseTab('https://example.com');
+await new Promise(r => setTimeout(r, 8000));
+console.log(await page.title(), await page.url());
+EOF
+```
+
+주의사항:
+
+- `taskSpaces.useOrCreate('이름')`은 await 필수 (없으면 "task space not selected" 오류)
+- Chrome은 로컬 pproxy(127.0.0.1:3129)를 경유한다. pproxy가 죽어 있으면 크롬 래퍼가 자동 시작함
+- 프록시 정책상 차단된 도메인(clients2.google.com, redirector.gvt1.com 등)은 접속 불가
+- API로 가능한 수집(curl, instagram-cli 등)은 브라우저보다 먼저 고려한다
 
 ## 3. 협업 워크플로우
 
@@ -107,6 +135,7 @@ claude -p "프롬프트"
 | Claude Code 인증 만료 | `claude auth status`로 확인 후 재로그인 절차 안내 |
 | VM 교체로 CLI 소실 | `~/workspace/toolchain/MANIFEST.md` 참조해 재설치 |
 | 두뇌의 답변이 모호함 | 구체적 질문으로 1회 재요청, 그래도 모호하면 Muse가 판단해 진행 |
+| ego light 접속 실패 | pproxy 실행 확인 (`ss -tln \| grep 3129`), 데몬 재시작 (`ego-browser --doctor`), 그래도 안 되면 TROUBLESHOOTING.md #4 참조 |
 
 ---
 
